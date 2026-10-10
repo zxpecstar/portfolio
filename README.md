@@ -28,14 +28,14 @@ Prefer another host? Netlify, Cloudflare Pages and Vercel work by dragging in th
 
 | Setting | What it does |
 | --- | --- |
-| `name`, `siteTitle`, `description` | Header name, browser tab title, search/social description |
+| `name`, `siteTitle`, `description` | Header name, browser tab title, search/social description. Also update the matching tags in `index.html` (see below) |
 | `theme` | Five colours: background, text, secondary text, lines, accent |
 | `googleFont` | Any [Google Font](https://fonts.google.com) name, or `""` for system fonts |
 | `hero` | Headline, intro paragraph, and the small "Building / Interested in / Based in" facts |
-| `work.items` | Your projects: year, title, link, description, tag. Add as many as you like |
+| `work.items` | Your projects: year, title, link, description, tag. Add as many as you like. A small "3 projects" count shows by default; change or hide it with `work.label` |
 | `about` | Paragraphs and a skills line |
 | `contact` | Email and any number of social links |
-| `footer`, `notFound` | Footer text and the 404 page copy |
+| `footer`, `notFound` | Footer text and the 404 page copy. Write `{year}` in the footer to always show the current year |
 
 **Hiding a section:** make its list empty (`work.items: []`, `about.paragraphs: []`, or no `email` and `links: []` in `contact`). The section and its nav link disappear automatically.
 
@@ -56,7 +56,7 @@ docs/        README screenshot (safe to delete from your own copy)
 - **404 page:** GitHub Pages, Netlify and Cloudflare Pages serve `404.html` for missing URLs automatically. It finds your site's folder by itself, so it works on `username.github.io`, `username.github.io/repo-name/` and custom domains with no changes. (Opening `404.html` straight from disk won't work; it needs a web server.)
 - **Favicon:** a simple placeholder icon is built into both HTML files. Replace the `<link rel="icon">` line with your own image.
 - **Analytics:** add your snippet inside the `<head>` of `index.html` and `404.html`.
-- **Social previews (Open Graph images):** link previews are read before JavaScript runs, so to customise them add `og:title`, `og:description` and `og:image` meta tags directly in `index.html`.
+- **Social previews:** link previews (X, Slack, Discord, iMessage) don't run JavaScript, so they read the `<head>` of `index.html` rather than `config.js`. Update the title, description and `og:`/`twitter:` tags there to match your name and description. To add a preview image, uncomment the `og:image` line, point it at a full `https://` URL (1200x630 px is ideal) and switch `twitter:card` to `summary_large_image`.
 
 ## Design notes
 

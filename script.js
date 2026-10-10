@@ -28,6 +28,12 @@
 
   function has(arr) { return Array.isArray(arr) && arr.length > 0; }
 
+  // Turns undefined/null into "" so a missing field never prints the word "undefined".
+  function str(v) { return v == null ? "" : String(v); }
+
+  // Replaces {year} with the current year, so the footer never goes stale.
+  function fill(v) { return str(v).replace(/\{year\}/g, new Date().getFullYear()); }
+
   // Only allow http(s), mailto and relative links. Blocks javascript: URLs.
   function safeUrl(u) {
     u = String(u || "").trim();
@@ -46,6 +52,19 @@
     meta.setAttribute("name", "description");
     meta.setAttribute("content", S.description);
   }
+
+  // The static <meta> tags in index.html are what link scrapers (X, Slack, Discord) read, since they
+  // don't run JavaScript. Browsers get them kept in sync with config.js here.
+  function setMeta(selector, value) {
+    var m = $(selector);
+    if (m && value) m.setAttribute("content", value);
+  }
+  var pageTitle = document.title;
+  setMeta('meta[property="og:title"]', pageTitle);
+  setMeta('meta[name="twitter:title"]', pageTitle);
+  setMeta('meta[property="og:description"]', S.description);
+  setMeta('meta[name="twitter:description"]', S.description);
+  setMeta('meta[name="theme-color"]', S.theme && S.theme.paper);
 
   if (S.theme) {
     var root = document.documentElement.style;
@@ -83,8 +102,8 @@
   function buildFooter() {
     var f = S.footer || {};
     return el("footer", {}, [
-      el("span", { text: f.left || "" }),
-      el("span", { text: f.right || "" })
+      el("span", { text: fill(f.left) }),
+      el("span", { text: fill(f.right) })
     ]);
   }
 
@@ -113,10 +132,11 @@
     var hero = el("section", { class: "hero" });
     if (h.headline) hero.appendChild(el("h1", { text: h.headline }));
     if (h.intro) hero.appendChild(el("p", { text: h.intro }));
-    if (has(h.meta)) {
-      hero.appendChild(el("div", { class: "hero-meta" }, h.meta.map(function (m) {
-        var d = el("div", {}, [el("strong", { text: m.label })]);
-        d.appendChild(document.createTextNode(m.value));
+    var facts = (has(h.meta) ? h.meta : []).filter(function (m) { return m && (m.label || m.value); });
+    if (facts.length) {
+      hero.appendChild(el("div", { class: "hero-meta" }, facts.map(function (m) {
+        var d = el("div", {}, [el("strong", { text: str(m.label) })]);
+        d.appendChild(document.createTextNode(str(m.value)));
         return d;
       })));
     }
@@ -125,16 +145,26 @@
 
   function renderWork() {
     var w = S.work || {};
-    if (!has(w.items)) return null;
+    var items = (has(w.items) ? w.items : []).filter(function (it) { return it && it.title; });
+    if (!items.length) return null;
+
+    // Small label opposite the heading. Defaults to a count ("3 projects").
+    // Set work.label to "" to hide it. (work.columnLabel from v1.0.0 still works.)
+    var label;
+    if (w.columnLabel != null) label = w.columnLabel;
+    else if (w.label != null) {
+      var tpl = (items.length === 1 && w.labelOne != null) ? w.labelOne : w.label;
+      label = str(tpl).replace(/\{count\}/g, items.length);
+    } else label = items.length + (items.length === 1 ? " project" : " projects");
 
     var sec = el("section", { class: "section reveal", id: "work" }, [
       el("div", { class: "section-head" }, [
-        el("h2", { text: w.title }),
-        w.columnLabel ? el("span", { text: w.columnLabel }) : null
+        el("h2", { text: str(w.title) }),
+        label ? el("span", { text: label }) : null
       ])
     ]);
 
-    w.items.forEach(function (it) {
+    items.forEach(function (it) {
       var url = safeUrl(it.url);
       var title = el("h3", {}, [
         url
@@ -142,9 +172,9 @@
           : el("span", { text: it.title })
       ]);
       sec.appendChild(el("div", { class: "work-item" }, [
-        el("div", { class: "work-year", text: it.year || "" }),
+        el("div", { class: "work-year", text: str(it.year) }),
         el("div", { class: "work-body" }, [title, it.description ? el("p", { text: it.description }) : null]),
-        el("div", { class: "work-tags", text: it.tag || "" })
+        el("div", { class: "work-tags", text: str(it.tag) })
       ]));
     });
     return sec;
@@ -155,12 +185,12 @@
     if (!has(a.paragraphs)) return null;
 
     var sec = el("section", { class: "section about reveal", id: "about" }, [
-      el("div", { class: "section-head" }, [el("h2", { text: a.title })])
+      el("div", { class: "section-head" }, [el("h2", { text: str(a.title) })])
     ]);
 
     a.paragraphs.forEach(function (text, i) {
       var faded = a.fadeLastParagraph !== false && i === a.paragraphs.length - 1 && a.paragraphs.length > 1;
-      sec.appendChild(el("p", { class: faded ? "gray" : "", text: text }));
+      sec.appendChild(el("p", { class: faded ? "gray" : "", text: str(text) }));
     });
 
     if (has(a.skills)) {
@@ -181,7 +211,7 @@
     if (has(c.links)) {
       sec.appendChild(el("div", { class: "contact-row" }, c.links.map(function (l) {
         var u = safeUrl(l.url);
-        return u ? el("a", { href: u, text: l.label, external: /^https?:/i.test(u) }) : null;
+        return u ? el("a", { href: u, text: str(l.label) || u, external: /^https?:/i.test(u) }) : null;
       })));
     }
     return sec;

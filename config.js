@@ -18,6 +18,8 @@ window.SITE = {
   name: "Your Name",                 // shown top-left and in the footer
   siteTitle: "Your Name",            // browser tab title
   description: "Portfolio of Your Name — web developer and designer.", // search/social preview text
+  // NOTE: link previews (X, Slack, Discord) and some crawlers don't run JavaScript, so they read the
+  // <head> of index.html instead. Update the title, description and og:/twitter: tags there too.
   lang: "en",                        // page language code
   homeUrl: "",                       // where "Back to homepage" on the 404 page points.
                                      // Leave empty: it's detected automatically.
@@ -66,25 +68,28 @@ window.SITE = {
 
   work: {
     title: "Selected work",
-    columnLabel: "Project • Status",   // small label on the right of the heading
+    // Small label opposite the heading. {count} becomes the number of projects.
+    // Set label to "" to hide it, or write your own text, e.g. "Since 2020".
+    label: "{count} projects",
+    labelOne: "{count} project",       // used when you have exactly one
 
     items: [
       {
-        year: "2026",
+        year: "20XX",                    // any short text works: "2026", "2024–25", "Now"
         title: "Project One",
         url: "https://example.com",      // set to "" for no link
         description: "A short sentence or two about this project and what makes it interesting.",
-        tag: "Active"                    // status, role, tech: anything short
+        tag: "Active"                    // shown on the right: status, role, tech, anything short
       },
       {
-        year: "2025",
+        year: "20XX",
         title: "Project Two",
         url: "https://example.com",
         description: "Another project. Keep descriptions brief; visitors skim.",
         tag: "Shipped"
       },
       {
-        year: "2024",
+        year: "20XX",
         title: "Project Three",
         url: "",
         description: "A project without a link, for example client work or something in progress.",
@@ -127,7 +132,7 @@ window.SITE = {
   /* ---------- FOOTER ---------- */
 
   footer: {
-    left: "Your Name, 2026",
+    left: "Your Name, {year}",     // {year} fills in the current year automatically
     right: "City, Country"
   },
 
