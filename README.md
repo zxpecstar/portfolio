@@ -37,6 +37,8 @@ Prefer another host? Netlify, Cloudflare Pages and Vercel work by dragging in th
 | `contact` | Email and any number of social links |
 | `footer`, `notFound` | Footer text and the 404 page copy. Write `{year}` in the footer to always show the current year |
 
+**Before you publish:** open your site, press F12 and look at the **Console**. If any sample text from the template is still in `config.js` (`example.com` links, "Your Name", `20XX` years, "City, Country"), a warning lists exactly which fields to replace. Visitors never see it on the page itself.
+
 **Hiding a section:** make its list empty (`work.items: []`, `about.paragraphs: []`, or no `email` and `links: []` in `contact`). The section and its nav link disappear automatically.
 
 ## Files
@@ -60,7 +62,7 @@ docs/        README screenshot (safe to delete from your own copy)
 
 ## Design notes
 
-Single 640px column, soft off-white paper, one accent colour, subtle scroll-reveal that respects `prefers-reduced-motion`, and a mobile layout under 600px. Links are sanitised so only `http(s)`, `mailto` and relative URLs are accepted.
+Single 640px column, soft off-white paper, one accent colour, subtle scroll-reveal that respects `prefers-reduced-motion`, and a mobile layout under 600px. Links are sanitised so only `http(s)`, `mailto` and relative URLs are accepted. Accessibility basics are built in: proper `nav`/`main`/`header`/`footer` landmarks, a skip-to-content link for keyboard users, visible focus outlines, generous tap targets, and a screen-reader hint on links that open in a new tab.
 
 ## Licence
 

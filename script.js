@@ -21,7 +21,12 @@
     if (opts.id) node.id = opts.id;
     if (opts.text != null) node.textContent = opts.text;
     if (opts.href) node.setAttribute("href", opts.href);
-    if (opts.external) { node.target = "_blank"; node.rel = "noopener noreferrer"; }
+    if (opts.external) {
+      node.target = "_blank";
+      node.rel = "noopener noreferrer";
+      // Screen-reader-only hint, so people know the link leaves the page.
+      node.appendChild(el("span", { class: "sr-only", text: " (opens in a new tab)" }));
+    }
     (children || []).forEach(function (c) { if (c) node.appendChild(c); });
     return node;
   }
@@ -85,7 +90,8 @@
   /* ---------- shared: header + footer ---------- */
 
   function buildHeader(prefix) {
-    var navLinks = el("div", { class: "nav-links" });
+    var navLinks = el("nav", { class: "nav-links" });
+    navLinks.setAttribute("aria-label", "Main");
     var n = S.nav || {};
     if (has(S.work && S.work.items)) navLinks.appendChild(el("a", { href: prefix + "#work", text: n.work || "Work" }));
     if (has(S.about && S.about.paragraphs)) navLinks.appendChild(el("a", { href: prefix + "#about", text: n.about || "About" }));
@@ -97,6 +103,18 @@
         navLinks
       ])
     ]);
+  }
+
+  // "Skip to content" link: invisible until a keyboard user tabs to it.
+  function buildSkipLink() {
+    return el("a", { class: "skip-link", href: "#main", text: "Skip to content" });
+  }
+
+  // The page's <main> landmark. tabindex=-1 lets the skip link move keyboard focus into it.
+  function buildMain(children) {
+    var m = el("main", { id: "main" }, children);
+    m.setAttribute("tabindex", "-1");
+    return m;
   }
 
   function buildFooter() {
@@ -113,8 +131,9 @@
     var nf = S.notFound || {};
     var wrap = $(".wrap");
     var base = window.__BASE__ || "";   // set by 404.html: the folder the site lives in
+    wrap.appendChild(buildSkipLink());
     wrap.appendChild(buildHeader(base + "index.html"));
-    wrap.appendChild(el("main", {}, [
+    wrap.appendChild(buildMain([
       el("section", { class: "error" }, [
         el("div", { class: "error-code", text: nf.code }),
         el("h1", { text: nf.headline }),
@@ -124,6 +143,40 @@
     ]));
     wrap.appendChild(buildFooter());
   }
+
+  /* ---------- placeholder check ---------- */
+
+  // If sample text from the template is still in config.js, say so in the browser console
+  // (press F12 → Console) so it doesn't get published by accident. Nothing shows on the page itself.
+  var PLACEHOLDERS = [
+    /example\.(com|org|net)/i,
+    /\byour[ -](name|username|handle)\b/i,
+    /^20XX$/,
+    /^City, Country$/
+  ];
+
+  function warnAboutPlaceholders() {
+    var found = [];
+
+    (function walk(value, path) {
+      if (typeof value === "string") {
+        if (PLACEHOLDERS.some(function (re) { return re.test(value); })) found.push(path);
+      } else if (Array.isArray(value)) {
+        value.forEach(function (v, i) { walk(v, path + "[" + i + "]"); });
+      } else if (value && typeof value === "object") {
+        Object.keys(value).forEach(function (k) { walk(value[k], path ? path + "." + k : k); });
+      }
+    })(S, "");
+
+    if (found.length && window.console && console.warn) {
+      console.warn(
+        "[portfolio-template] config.js still contains placeholder text in " + found.length +
+        " field" + (found.length === 1 ? "" : "s") + ":\n  • " + found.join("\n  • ") +
+        "\nReplace these with your own details before publishing."
+      );
+    }
+  }
+
 
   /* ---------- home page ---------- */
 
@@ -219,11 +272,11 @@
 
   function renderHome() {
     var wrap = $(".wrap");
+    wrap.appendChild(buildSkipLink());
     wrap.appendChild(buildHeader(""));
-    [renderHero(), renderWork(), renderAbout(), renderContact()].forEach(function (s) {
-      if (s) wrap.appendChild(s);
-    });
+    wrap.appendChild(buildMain([renderHero(), renderWork(), renderAbout(), renderContact()]));
     wrap.appendChild(buildFooter());
+    warnAboutPlaceholders();
 
     // scroll reveal
     var els = document.querySelectorAll(".reveal");

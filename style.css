@@ -78,6 +78,41 @@ a:focus-visible{
   outline-offset:3px;
 }
 
+/* Text for screen readers only (e.g. "opens in a new tab") */
+.sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  margin:-1px;
+  padding:0;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+
+/* "Skip to content": hidden until a keyboard user tabs to it */
+.skip-link{
+  position:absolute;
+  top:-48px;
+  left:24px;
+  z-index:10;
+  padding:8px 14px;
+  background:var(--ink);
+  color:var(--paper);
+  font-size:14px;
+  border-radius:4px;
+  transition:top .15s ease;
+}
+
+.skip-link:focus{
+  top:12px;
+}
+
+main:focus{
+  outline:none;
+}
+
 .wrap{
   max-width:640px;
   margin:0 auto;
@@ -114,6 +149,10 @@ header{
   color:var(--gray);
   transition:color .12s ease;
   -webkit-tap-highlight-color:transparent;
+  /* bigger tap target without changing the layout */
+  display:inline-block;
+  padding:10px 0;
+  margin:-10px 0;
 }
 
 .nav-links a:hover{
@@ -299,6 +338,13 @@ header{
   gap:28px;
   font-size:14px;
   color:var(--gray);
+}
+
+.contact-row a{
+  /* bigger tap target without changing the layout */
+  display:inline-block;
+  padding:10px 0;
+  margin:-10px 0;
 }
 
 .contact-row a:hover{
